@@ -1,0 +1,96 @@
+SQL> create table book (bookid int primary key,title varchar(10),pages int,price int);
+
+Table created.
+
+SQL> desc book
+ Name                                      Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ BOOKID                                    NOT NULL NUMBER(38)
+ TITLE                                              VARCHAR2(10)
+ PAGES                                              NUMBER(38)
+ PRICE                                              NUMBER(38)
+
+SQL> create table author(authorid int primary key,authorname varchar(10),address varchar(10),bookid int references book(bookid));
+
+Table created.
+
+SQL> desc author
+ Name                                      Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ AUTHORID                                  NOT NULL NUMBER(38)
+ AUTHORNAME                                         VARCHAR2(10)
+ ADDRESS                                            VARCHAR2(10)
+ BOOKID                                             NUMBER(38)
+
+SQL> create table studentcard(rollno int primary key,branch varchar(5),age int,bookid int references book(bookid),authorid references author(authorid));
+
+Table created.
+
+SQL> desc studentcard
+ Name                                      Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ ROLLNO                                    NOT NULL NUMBER(38)
+ BRANCH                                             VARCHAR2(5)
+ AGE                                                NUMBER(38)
+ BOOKID                                             NUMBER(38)
+ AUTHORID                                           NUMBER(38)
+
+SQL> select * from book;
+
+    BOOKID TITLE           PAGES      PRICE
+---------- ---------- ---------- ----------
+         1 OS                500        750
+         2 subtle            100        150
+         3 aadu              500        550
+         4 godfather        1000       2400
+         5 AI                459        499
+
+SQL> select * from author;
+
+  AUTHORID AUTHORNAME ADDRESS        BOOKID
+---------- ---------- ---------- ----------
+        11 Mark       Chicago             2
+        12 Jhon       Chennai             4
+        13 Steve      Chennai             1
+        14 David      Montreal            3
+        15 Lewis      UK                  5
+
+SQL> select * from studentcard;
+
+    ROLLNO BRANC        AGE     BOOKID   AUTHORID
+---------- ----- ---------- ---------- ----------
+       101 MCA           22          1         13
+       102 MCA           21          4         12
+       103 MBA           22          2         11
+       104 MBA           22          3         14
+       105 MCA           23          5         15
+
+SQL> select author.authorid,authorname,address,book.bookid,pages from author,book where author.bookid=book.bookid and pages=(select max(pages)from book);
+
+  AUTHORID AUTHORNAME ADDRESS        BOOKID      PAGES
+---------- ---------- ---------- ---------- ----------
+        12 Jhon       Chennai             4       1000
+
+SQL> select rollno,age,branch from studentcard,book where studentcard.bookid=book.bookid and title!=’OS’;
+
+    ROLLNO        AGE BRANC
+---------- ---------- -----
+       102         21 MCA
+       103         22 MBA
+       104         22 MBA
+       105         23 MCA
+
+SQL> select branch,avg(age)from studentcard group by branch;
+
+BRANC   AVG(AGE)
+----- ----------
+MBA           22
+MCA           22
+
+SQL> select rollno,age,branch from studentcard where authorid in (select authorid from author where address=’Chennai’);
+
+    ROLLNO        AGE BRANC
+---------- ---------- -----
+       101         22 MCA
+       102         21 MCA
+
